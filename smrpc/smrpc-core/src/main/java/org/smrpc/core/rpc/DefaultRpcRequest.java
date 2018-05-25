@@ -10,6 +10,15 @@ public class DefaultRpcRequest implements RpcRequest, Serializable {
 	private String methodName;
 	private Object[] arguments;
 	private long requestId;
+	private Class<?>[] parameterTypes;
+	
+	public Class<?>[] getParameterTypes() {
+		return parameterTypes;
+	}
+
+	public void setParameterTypes(Class<?>[] parameterTypes) {
+		this.parameterTypes = parameterTypes;
+	}
 
 	public String getInterfaceName() {
 		return interfaceName;

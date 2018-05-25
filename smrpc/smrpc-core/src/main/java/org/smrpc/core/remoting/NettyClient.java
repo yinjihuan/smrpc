@@ -1,7 +1,10 @@
 package org.smrpc.core.remoting;
 
+import org.smrpc.core.rpc.DefaultRpcRequest;
 import org.smrpc.core.rpc.RpcRequest;
-import org.smrpc.core.rpc.RpcResponse;
+import org.smrpc.core.serialize.RpcRequestEncoder;
+import org.smrpc.core.serialize.RpcResponseDecoder;
+import org.smrpc.core.serialize.RpcResponseEncoder;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -12,9 +15,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.serialization.ClassResolvers;
-import io.netty.handler.codec.serialization.ObjectDecoder;
-import io.netty.handler.codec.serialization.ObjectEncoder;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
 
 public class NettyClient {
 	
@@ -69,6 +71,7 @@ public class NettyClient {
 				});
 			ChannelFuture f = b.connect(host, port);
 			this.channel = f.channel();
+			System.err.println("NNN");
 			return true;
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -77,24 +80,18 @@ public class NettyClient {
 	}
 	
 	 public void initClientChannel(SocketChannel ch) {
-		// 使用框架自带的对象编解码器
-     	ch.pipeline().addLast(
-     			new ObjectDecoder(
-     					ClassResolvers.cacheDisabled(
-     							this.getClass().getClassLoader()
-     					)
-     			)
-     	);
-     	ch.pipeline().addLast(new ObjectEncoder());
-     	ch.pipeline().addLast(new NettyClientHandler());
+		 ch.pipeline().addLast("frameDecoder", new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
+	     ch.pipeline().addLast("frameEncoder", new LengthFieldPrepender(4));
+		 ch.pipeline().addLast("decoder", new RpcResponseDecoder());
+	     ch.pipeline().addLast("encoder", new RpcRequestEncoder());
+     	 ch.pipeline().addLast(new NettyClientHandler());
      }
 	 
-	 public RpcResponse request(RpcRequest request) {
-		 return doRequest(request);
+	 public void request(RpcRequest request) {
+		 DefaultRpcRequest r = new DefaultRpcRequest();
+		 System.out.println(channel);
+		 this.channel.writeAndFlush(r);
+		 System.out.println(channel+"enmd");
 	 }
 	 
-	 private RpcResponse doRequest(RpcRequest request) {
-		 this.channel.writeAndFlush(request);
-		 return null;
-	 }
 }

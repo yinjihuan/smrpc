@@ -10,6 +10,11 @@ public class DefaultRpcResponse implements RpcResponse, Serializable {
 	private Exception exception;
 	private long requestId;
 
+	public DefaultRpcResponse(long requestId) {
+		super();
+		this.requestId = requestId;
+	}
+
 	public Object getValue() {
 		return value;
 	}

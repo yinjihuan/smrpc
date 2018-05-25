@@ -1,7 +1,7 @@
 package org.smrpc.core.remoting;
 
-import org.smrpc.core.rpc.RpcRequest;
-import org.smrpc.core.rpc.RpcResponse;
+import org.smrpc.core.serialize.RpcRequestDecoder;
+import org.smrpc.core.serialize.RpcResponseEncoder;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -12,9 +12,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.serialization.ClassResolvers;
-import io.netty.handler.codec.serialization.ObjectDecoder;
-import io.netty.handler.codec.serialization.ObjectEncoder;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
 
 public class NettyServer {
 	
@@ -68,7 +67,7 @@ public class NettyServer {
 				}).option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
 			ChannelFuture f = bootstrap.bind(port).sync();
-			 f.channel().closeFuture().sync();
+			f.channel().closeFuture().sync();
 		} catch(Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -78,16 +77,11 @@ public class NettyServer {
 	}
 	
 	 public void initClientChannel(SocketChannel ch) {
-		// 使用框架自带的对象编解码器
-     	ch.pipeline().addLast("decoder", 
-     			new ObjectDecoder(
-     					ClassResolvers.cacheDisabled(
-     							this.getClass().getClassLoader()
-     					)
-     			)
-     	);
-     	ch.pipeline().addLast("encoder", new ObjectEncoder());
-     	ch.pipeline().addLast("handler", new NettyServerHandler());
+		  ch.pipeline().addLast("frameDecoder", new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
+	      ch.pipeline().addLast("frameEncoder", new LengthFieldPrepender(4));
+     	ch.pipeline().addLast("decoder", new RpcRequestDecoder());
+     	ch.pipeline().addLast("encoder", new RpcResponseEncoder());
+     	ch.pipeline().addLast(new NettyServerHandler());
      }
 	 
 }

@@ -18,6 +18,11 @@
 				<artifactId>smrpc-core</artifactId>
 				<version>1.0.0</version>
 			</dependency>
+			<dependency>
+				<groupId>com.cxytiandi</groupId>
+				<artifactId>smrpc-example-api</artifactId>
+				<version>1.0.0</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 </project>

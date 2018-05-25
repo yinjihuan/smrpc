@@ -1,10 +1,11 @@
 package org.smrpc.example.client;
 
-import java.util.concurrent.atomic.AtomicLong;
-
+import org.smrpc.core.proxy.JdkProxyFactory;
+import org.smrpc.core.proxy.RefererInvocationHandler;
 import org.smrpc.core.remoting.NettyClient;
 import org.smrpc.core.rpc.DefaultRpcRequest;
 import org.smrpc.core.rpc.RpcRequest;
+import org.smrpc.example.api.UserRpcService;
 
 /**
  * RPC客户端测试代码
@@ -15,15 +16,16 @@ import org.smrpc.core.rpc.RpcRequest;
  * 
  */
 public class ExampleClientApp {
-	 private static final AtomicLong INVOKE_ID = new AtomicLong(0);
 	public static void main(String[] args) {
 		String host = "127.0.0.1";
 		int port = 4000;
+		System.err.println("********");
 		NettyClient client = new NettyClient(host, port);
-		RpcRequest request = new DefaultRpcRequest();
-		client.request(request);
-/*		while(true)
-			System.out.println(INVOKE_ID.getAndIncrement());
-*/		
+		System.err.println("VVVV");
+		//RpcRequest request = new DefaultRpcRequest();
+		//client.request(null);
+		JdkProxyFactory factory = new JdkProxyFactory();
+		UserRpcService userRpcService = factory.getProxy(UserRpcService.class, new RefererInvocationHandler<UserRpcService>(UserRpcService.class, client));
+		System.out.println(userRpcService.getName(1001l));
 	}
 }

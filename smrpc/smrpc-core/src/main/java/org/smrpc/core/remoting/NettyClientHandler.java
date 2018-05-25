@@ -1,6 +1,7 @@
 package org.smrpc.core.remoting;
 
-import org.smrpc.core.rpc.RpcRequest;
+import org.smrpc.core.remoting.exchange.support.DefaultFuture;
+import org.smrpc.core.rpc.DefaultRpcResponse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -8,8 +9,10 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
 	
 	@Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-		RpcRequest request = (RpcRequest) msg;
-		System.err.println("client:" + request.getRequestId());
+		System.err.println("pppppppppppp");
+		DefaultRpcResponse response = (DefaultRpcResponse) msg;
+		DefaultFuture.received(ctx.channel(), response);
+		System.err.println("client:" + response.getRequestId());
     }
 
     @Override
